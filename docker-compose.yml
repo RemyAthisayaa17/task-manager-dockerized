@@ -1,0 +1,50 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: task-manager-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: task_manager
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
+  backend:
+    build:
+      context: ./backend
+    container_name: task-manager-backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - postgres
+
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: task-manager-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+
+  nginx:
+    build:
+      context: ./nginx
+    container_name: task-manager-nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend
+
+
+volumes:
+  postgres_data:
